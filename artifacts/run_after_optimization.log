@@ -1,0 +1,1 @@
+{"mode": "after_optimization", "results": {"count": 1800, "status_counts": {}, "success_count": 1800, "error_count": 0, "error_rate": 0.0, "p50_ms": 104.76340000059281, "p95_ms": 128.7858999994569, "p99_ms": 141.59339999969234, "avg_queries": 97.83777777777777, "queries_per_request_distribution": {"min": 32, "max": 139, "median": 99.0}}}

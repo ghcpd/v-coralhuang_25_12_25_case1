@@ -1,0 +1,107 @@
+*** Begin Patch
+*** Update File: handlers.py
+@@
+-def get_users(db: Session, headers: dict, query: dict):
+-    """Baseline: returns users with COUNT(*) executed on every call."""
+-    if not _auth_ok(headers):
+-        return 401, {"error": "unauthorized"}
+-
+-    page, per_page, offset = _paginate_params(query)
+-
+-    items = db.query(User).order_by(User.id).offset(offset).limit(per_page).all()
+-
+-    # baseline N+1 hotspot: fetch per-user stats with a separate query for each user
+-    items_with_stats = []
+-    for u in items:
+-        s = db.query(UserStats).filter(UserStats.user_id == u.id).one()
+-        d = u.to_dict()
+-        d.update(s.to_dict())
+-        items_with_stats.append(d)
+-
+-    total = db.query(func.count(User.id)).scalar()  # expensive on large tables
+-
+-    return 200, {"items": items_with_stats, "total": total}
++def get_users(db: Session, headers: dict, query: dict):
++    """Optimized implementation (preserves pagination and response shape):
++
++    - Eliminates the per-item N+1 by fetching `UserStats` for the page in a single
++      query and merging results in-memory.
++    - Avoids a full-table COUNT(*) by reading a precomputed counter from `app_meta`.
++    """
++    if not _auth_ok(headers):
++        return 401, {"error": "unauthorized"}
++
++    page, per_page, offset = _paginate_params(query)
++
++    # fetch the page (same ORDER/OFFSET/LIMIT semantics)
++    items = db.query(User).order_by(User.id).offset(offset).limit(per_page).all()
++    user_ids = [u.id for u in items]
++
++    # bulk-load stats for the page (single query) -> removes N+1
++    stats = {s.user_id: s for s in db.query(UserStats).filter(UserStats.user_id.in_(user_ids)).all()} if user_ids else {}
++
++    items_with_stats = []
++    for u in items:
++        d = u.to_dict()
++        stat = stats.get(u.id)
++        if stat:
++            d.update(stat.to_dict())
++        else:
++            d.update({"followers_count": 0, "posts_count": 0})
++        items_with_stats.append(d)
++
++    # read precomputed total from app_meta (single-row indexed lookup)
++    total_row = db.execute("SELECT value_int FROM app_meta WHERE key='users_count'").fetchone()
++    total = int(total_row[0]) if total_row else db.query(func.count(User.id)).scalar()
++
++    return 200, {"items": items_with_stats, "total": total}
+@@
+-def get_user_followers(db: Session, headers: dict, path_params: dict, query: dict):
+-    """Baseline: returns follower users but triggers N+1 by accessing relationship."""
+-    if not _auth_ok(headers):
+-        return 401, {"error": "unauthorized"}
+-
+-    user_id = int(path_params.get("user_id", 0))
+-    page, per_page, offset = _paginate_params(query)
+-
+-    follows = (
+-        db.query(Follow).filter(Follow.user_id == user_id).order_by(Follow.id).offset(offset).limit(per_page).all()
+-    )
+-
+-    # baseline: accessing follow.follower will lazy-load each User -> N+1
+-    items = [f.follower.to_dict() for f in follows]
+-    total = db.query(func.count(Follow.id)).filter(Follow.user_id == user_id).scalar()
+-
+-    return 200, {"items": items, "total": total}
++def get_user_followers(db: Session, headers: dict, path_params: dict, query: dict):
++    """Optimized followers endpoint:
++
++    - Loads follower `User` rows with a single JOIN (no N+1).
++    - Uses the precomputed follower count from `user_stats` to avoid COUNT(*).
++    - Preserves pagination semantics and response shape.
++    """
++    if not _auth_ok(headers):
++        return 401, {"error": "unauthorized"}
++
++    user_id = int(path_params.get("user_id", 0))
++    page, per_page, offset = _paginate_params(query)
++
++    # join to load follower users in one query (no per-row lazy loads)
++    rows = (
++        db.query(User)
++        .join(Follow, User.id == Follow.follower_id)
++        .filter(Follow.user_id == user_id)
++        .order_by(Follow.id)
++        .offset(offset)
++        .limit(per_page)
++        .all()
++    )
++
++    items = [u.to_dict() for u in rows]
++
++    # use the stored followers_count from user_stats (single-row lookup)
++    stat = db.query(UserStats).filter(UserStats.user_id == user_id).one_or_none()
++    total = stat.followers_count if stat is not None else 0
++
++    return 200, {"items": items, "total": total}
+*** End Patch

@@ -1,0 +1,20 @@
+{
+  "module": "handlers_baseline",
+  "handler": "get_user_followers",
+  "results": {
+    "count": 1800,
+    "status_counts": {},
+    "success_count": 1800,
+    "error_count": 0,
+    "error_rate": 0.0,
+    "p50_ms": 30.952049999541487,
+    "p95_ms": 53.67070000011154,
+    "p99_ms": 63.996799999586074,
+    "avg_queries": 75.9,
+    "queries_per_request_distribution": {
+      "min": 8,
+      "max": 192,
+      "median": 75.0
+    }
+  }
+}
