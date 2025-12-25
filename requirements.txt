@@ -1,0 +1,4 @@
+SQLAlchemy==1.4.53
+alembic==1.11.1
+Faker==18.3.0
+tqdm==4.66.1
