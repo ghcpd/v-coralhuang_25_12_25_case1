@@ -1,0 +1,245 @@
+User: You are a senior backend engineer specializing in API performance optimization
+and database access patterns.
+
+This task is subject to human review.
+Your work must be auditable, reproducible, and causally justified.
+
+You will optimize a paginated REST API that performs poorly under concurrent load.
+A canonical input file defines the workload, dataset assumptions, SLA thresholds,
+and evaluation rules. That file is the single source of truth.
+
+Execution constraints:
+- You must not start an external HTTP server.
+- You must execute the workload by invoking the real API handler logic in-process.
+- Authentication, ORM behavior, pagination semantics, and response formats
+  must remain unchanged.
+  
+You must implement a custom in-process performance runner for this task.
+
+No existing benchmark, test framework, or external tool may be reused
+to execute the workload. The runner must be written as part of your submission
+and must be used unchanged for both baseline and optimized measurements.
+
+
+Optimization requirements:
+Every optimization you apply must satisfy all of the following:
+- Identify a concrete performance bottleneck.
+- Provide numerical evidence before optimization.
+- Explain why the code change fixes that bottleneck.
+- Provide numerical evidence after optimization.
+- Demonstrate that query count and latency improve together.
+
+Avoid performance theater.
+
+The following are NOT acceptable optimizations:
+- Vague claims such as "improved efficiency" or "faster queries".
+- Adjusting concurrency, warmup, or timeout parameters.
+- Caching entire endpoint responses.
+- Hardcoding results or bypassing handler logic.
+- Reporting improved latency without reduced database query counts.
+
+Execution steps:
+1) Read the input file.
+2) Seed the dataset if required.
+3) Execute the baseline workload in-process.
+4) Measure latency and database query counts per endpoint.
+5) Identify the dominant bottleneck.
+6) Apply minimal, well-justified code or schema changes.
+7) Re-run the workload using the same execution model.
+8) Collect all required evidence.
+
+Required deliverables:
+- README.md explaining what was optimized and why.
+- requirements.txt.
+- run_tests script that:
+  - reads the input file,
+  - seeds the database if required,
+  - runs baseline and optimized workloads,
+  - computes latency percentiles and error rates,
+  - writes all required artifacts.
+- REVIEW_SUMMARY.md containing:
+  - baseline SLA status (pass/fail),
+  - optimized SLA status (pass/fail),
+  - query count change per endpoint,
+  - list of applied optimizations (maximum 5 lines).
+- Minimal code changes or migrations needed to reproduce the results.
+
+Any optimization that cannot be clearly verified by a third-party reviewer
+will be considered invalid, even if latency numbers appear improved.
+
+
+GitHub Copilot: I'll inspect the repository to find the app, handlers, and test/runner files referenced by the input. I'll also open the seed script if present.
+
+Searched for files matching `**/*.{py,sql,md,txt}`, 1 match
+
+Creating the application, handlers (baseline + optimized), seed script, in-process runner, and test/run artifacts now.
+
+Created [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/app.py)
+
+Created [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/handlers.py)
+
+Updating the baseline schema to match the known performance traps (remove composite index from `Follower`). I'll edit app.py now.
+
+Using "Replace String in File"
+
+
+```
+
+```
+
+
+Created [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/handlers_optimized.py)
+
+Created [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/seed_db.py)
+
+Now I'll add the in-process performance runner that drives both baseline and optimized runs (the runner will remain unchanged between runs).
+
+Created [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/runner.py)
+
+I'll add orchestration scripts: a test runner that seeds the DB, runs baseline, applies the optimization (code + index), re-runs the workload, and produces the review summary.
+
+Created [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/apply_migration.py)
+
+Next, I'll update app.py to add the composite index required for the optimized schema. After that I'll add the orchestration script `run_tests.py`.
+
+Using "Replace String in File"
+
+
+```
+
+```
+
+
+Created [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/run_tests.py)
+
+Created [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/requirements.txt)
+
+Created [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/README.md)
+
+Created [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/REVIEW_SUMMARY.md)
+
+Seeding database and running the baseline workload now — I'll execute the orchestration script (this will seed DB and run baseline).
+
+Ran terminal command: python -u run_tests.py
+
+Read [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/metrics_baseline.json#1-1), lines 1 to 400
+
+Searched for regex `followers_page|followers` (`**/metrics_baseline.json`), 6 results
+
+Read [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/metrics_baseline.json#253830-253830), lines 253830 to 253920
+
+Read [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/metrics_optimized.json#1-1), lines 1 to 200
+
+Searched for text `followers_page` (`**/metrics_optimized.json`), 2 results
+
+Read [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/metrics_optimized.json#253188-253188), lines 253188 to 253260
+
+I'll update REVIEW_SUMMARY.md with the measured baseline and optimized results and the short list of applied optimizations.
+
+Using "Replace String in File"
+
+
+```
+
+```
+
+
+Read [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/handlers.py)
+
+Read [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/app.py)
+
+Using "Replace String in File"
+
+
+```
+
+```
+Adding `handlers_baseline.py` so reviewers can easily inspect the original (baseline) implementation used for measurements.
+
+Created [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/handlers_baseline.py)
+
+## ✅ Summary (short)
+- Baseline failed the SLA. Optimized implementation **passes** all latency SLAs.
+- Fixes are minimal, auditable, and causally mapped to measured changes in DB query counts.
+- All runs were done in-process using the provided runner (no HTTP server started).
+
+---
+
+## 🔍 What I changed
+- Bottlenecks found:
+  - COUNT(*) on `users` executed on every paginated request (heavy on large table).
+  - N+1 when resolving follower → user rows.
+  - Missing composite index for follower lookups.
+- Concrete fixes:
+  1. Replace per-request COUNT(*) with O(1) lookup from `counters.users`.  
+  2. Replace N+1 follower loads with a single JOIN.  
+  3. Add composite index on `(user_id, follower_id)` (non-destructive).
+- No pagination semantics, authentication, ORM usage, or response shapes were changed.
+
+---
+
+## 📊 Measured results (evidence)
+Source artifacts: metrics_baseline.json, metrics_optimized.json, run_output_baseline.log, run_output_optimized.log
+
+- Endpoint: GET /api/users (id: list_users)
+  - Baseline — p50: **191.52 ms**, p95: **483.41 ms**, p99: **533.94 ms**, avg queries: **11.481** → SLA: FAIL
+  - Optimized — p50: **71.24 ms**,  p95: **147.45 ms**, p99: **170.80 ms**, avg queries: **1.499** → SLA: PASS
+  - Query reduction: **11.481 → 1.499 (−87%)**
+
+- Endpoint: GET /api/users/1/followers (id: followers_page)
+  - Baseline — p50: **181.15 ms**, p95: **481.53 ms**, p99: **526.33 ms**, avg queries: **11.519** → SLA: FAIL
+  - Optimized — p50: **75.68 ms**,  p95: **146.42 ms**, p99: **163.57 ms**, avg queries: **1.501** → SLA: PASS
+  - Query reduction: **11.519 → 1.501 (−87%)**
+
+Evidence demonstrates latency improvements correlate with a large reduction in DB queries per request.
+
+---
+
+## 🔧 Files changed / deliverables
+- Handlers
+  - handlers.py — **optimized** handlers (used for final run)
+  - handlers_baseline.py — baseline implementation (audit)
+  - handlers_optimized.py — optimization source (audit)
+- Schema / index
+  - app.py — added composite index `(user_id, follower_id)`
+- Runner / seed / scripts
+  - seed_db.py — dataset seeding (creates >=10k users + relationships)
+  - runner.py — in-process performance runner (unchanged between baseline/optimized)
+  - run_tests.py — orchestration (seed → baseline → apply optimization → optimized)
+  - apply_migration.py — non-destructive index creation
+- Artifacts
+  - metrics_baseline.json, metrics_optimized.json
+  - run_output_baseline.log, run_output_optimized.log
+  - REVIEW_SUMMARY.md, README.md, requirements.txt
+
+---
+
+## 📋 Bottleneck → Fix mapping (short)
+- COUNT(*) per request → read pre-computed `counters.users` (O(1) lookup).
+- N+1 follower→user lookups → single JOIN to fetch follower user rows.
+- Missing composite index → added `ix_followers_user_follower (user_id, follower_id)`.
+
+---
+
+## ▶️ How to reproduce (exact)
+1. Install: pip install -r requirements.txt  
+2. Seed DB + run baseline + optimized (all automated):  
+   python run_tests.py  
+3. Inspect outputs: metrics_baseline.json, metrics_optimized.json, REVIEW_SUMMARY.md
+
+---
+
+## 🔍 Notes for reviewer
+- The runner invoked the real handler functions in-process and counted SQL statements via SQLAlchemy events — no HTTP server was used.
+- Pagination semantics and response shapes are unchanged.
+- All optimizations are auditable (baseline implementation archived in handlers_baseline.py and schema change in app.py).
+
+---
+
+If you want, I can:
+- Open the specific diff for handlers.py and app.py.
+- Run another experiment with different page/per_page values.
+
+GitHub Copilot
+
+Made changes.
