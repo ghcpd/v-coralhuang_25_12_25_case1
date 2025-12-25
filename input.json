@@ -1,0 +1,154 @@
+{
+  "test_id": "performance_api_pagination_latency_v2",
+  "task_mode": "optimize_and_verify",
+
+  "objective": "Optimize the API handlers so that paginated endpoints meet latency SLA under concurrent authenticated load. The optimization must be causally justified, auditable, and reflected in both latency and database query count.",
+
+  "execution": {
+    "model": "in_process",
+    "description": "Do not start an external HTTP server. Execute the workload by directly invoking the same handler code paths used by the API. Concurrency must be simulated in-process."
+  },
+
+  "entrypoints": {
+    "app_import": "app",
+    "handler_map": {
+      "GET /api/users": "handlers.get_users",
+      "GET /api/users/1/followers": "handlers.get_user_followers"
+    },
+    "notes": "Handlers must preserve authentication behavior, pagination semantics, ORM usage, and JSON response structure."
+  },
+
+  "environment": {
+    "auth": {
+      "type": "bearer",
+      "mode": "fixed_test_token",
+      "token": "test-token",
+      "description": "The fixed token is always accepted for local execution."
+    }
+  },
+
+  "dataset": {
+    "assumption": {
+      "users": ">= 10000",
+      "relationships": ">= 10000"
+    },
+    "seed": {
+      "required": true,
+      "cmd": "python seed_db.py",
+      "description": "The dataset must be seeded before any baseline or optimized run."
+    }
+  },
+
+  "known_performance_traps": {
+    "GET /api/users": [
+      "OFFSET-based pagination on a large table",
+      "COUNT(*) executed on every paginated request"
+    ],
+    "GET /api/users/1/followers": [
+      "N+1 queries caused by lazy-loaded relationships",
+      "Missing composite index on (user_id, follower_id)"
+    ]
+  },
+
+  "workload": {
+    "requests": [
+      {
+        "id": "list_users",
+        "method": "GET",
+        "endpoint": "/api/users",
+        "query": {
+          "page": 1,
+          "per_page": 100
+        }
+      },
+      {
+        "id": "followers_page",
+        "method": "GET",
+        "endpoint": "/api/users/1/followers",
+        "query": {
+          "page": 1,
+          "per_page": 100
+        }
+      }
+    ],
+    "load_profile": {
+      "total_requests": 2000,
+      "concurrency": 50,
+      "warmup_requests": 200,
+      "runs": {
+        "baseline": 1,
+        "optimized": 1
+      },
+      "timeout_ms": 5000
+    }
+  },
+
+  "metrics": {
+    "latency_ms": {
+      "p50": "<= 150",
+      "p95": "<= 300",
+      "p99": "<= 500"
+    },
+    "expected_status": 200,
+    "error_rate": "<= 0.1%"
+  },
+
+  "evaluation_contract": {
+    "agent_must_prove": [
+      "Baseline results do not meet the SLA",
+      "A concrete performance bottleneck is identified",
+      "The applied optimization directly addresses that bottleneck",
+      "Latency improvement correlates with reduced database query count"
+    ],
+    "agent_must_not_do": [
+      "Cache full endpoint responses",
+      "Bypass ORM or handler logic",
+      "Change pagination semantics",
+      "Hardcode or short-circuit request handling"
+    ],
+    "human_verification_rules": [
+      "If baseline meets SLA, the submission is invalid",
+      "If query count per request does not decrease, optimization is invalid",
+      "If no clear bottleneck-to-fix mapping is provided, optimization is invalid"
+    ]
+  },
+
+  "comparison": {
+    "baseline_required": true,
+    "labels": {
+      "baseline": "before_optimization",
+      "optimized": "after_optimization"
+    },
+    "must_report": [
+      "p50_latency",
+      "p95_latency",
+      "p99_latency",
+      "error_rate",
+      "status_code_distribution",
+      "query_count_per_request"
+    ]
+  },
+
+  "evidence_required": [
+    "baseline_latency_summary",
+    "optimized_latency_summary",
+    "baseline_query_count_per_endpoint",
+    "optimized_query_count_per_endpoint",
+    "bottleneck_fix_table",
+    "code_diff_summary",
+    "run_output_log"
+  ],
+
+  "failure_conditions": [
+    "dataset_not_seeded",
+    "baseline_meets_sla",
+    "no_baseline_results",
+    "no_optimized_results",
+    "p95_latency_exceeds_threshold",
+    "p99_latency_exceeds_threshold",
+    "optimization_does_not_reduce_query_count",
+    "missing_bottleneck_fix_table",
+    "error_rate_exceeds_threshold",
+    "evidence_indicates_fabrication"
+  ]
+}

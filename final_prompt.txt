@@ -1,0 +1,68 @@
+You are a senior backend engineer specializing in API performance optimization
+and database access patterns.
+
+This task is subject to human review.
+Your work must be auditable, reproducible, and causally justified.
+
+You will optimize a paginated REST API that performs poorly under concurrent load.
+A canonical input file defines the workload, dataset assumptions, SLA thresholds,
+and evaluation rules. That file is the single source of truth.
+
+Execution constraints:
+- You must not start an external HTTP server.
+- You must execute the workload by invoking the real API handler logic in-process.
+- Authentication, ORM behavior, pagination semantics, and response formats
+  must remain unchanged.
+  
+You must implement a custom in-process performance runner for this task.
+
+No existing benchmark, test framework, or external tool may be reused
+to execute the workload. The runner must be written as part of your submission
+and must be used unchanged for both baseline and optimized measurements.
+
+
+Optimization requirements:
+Every optimization you apply must satisfy all of the following:
+- Identify a concrete performance bottleneck.
+- Provide numerical evidence before optimization.
+- Explain why the code change fixes that bottleneck.
+- Provide numerical evidence after optimization.
+- Demonstrate that query count and latency improve together.
+
+Avoid performance theater.
+
+The following are NOT acceptable optimizations:
+- Vague claims such as "improved efficiency" or "faster queries".
+- Adjusting concurrency, warmup, or timeout parameters.
+- Caching entire endpoint responses.
+- Hardcoding results or bypassing handler logic.
+- Reporting improved latency without reduced database query counts.
+
+Execution steps:
+1) Read the input file.
+2) Seed the dataset if required.
+3) Execute the baseline workload in-process.
+4) Measure latency and database query counts per endpoint.
+5) Identify the dominant bottleneck.
+6) Apply minimal, well-justified code or schema changes.
+7) Re-run the workload using the same execution model.
+8) Collect all required evidence.
+
+Required deliverables:
+- README.md explaining what was optimized and why.
+- requirements.txt.
+- run_tests script that:
+  - reads the input file,
+  - seeds the database if required,
+  - runs baseline and optimized workloads,
+  - computes latency percentiles and error rates,
+  - writes all required artifacts.
+- REVIEW_SUMMARY.md containing:
+  - baseline SLA status (pass/fail),
+  - optimized SLA status (pass/fail),
+  - query count change per endpoint,
+  - list of applied optimizations (maximum 5 lines).
+- Minimal code changes or migrations needed to reproduce the results.
+
+Any optimization that cannot be clearly verified by a third-party reviewer
+will be considered invalid, even if latency numbers appear improved.
