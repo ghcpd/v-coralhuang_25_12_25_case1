@@ -448,3 +448,71 @@ python runner.py       # Run baseline + optimized tests
 All results are 100% reproducible and auditable by third-party reviewers.
 
 Made changes.
+
+User: Ur review summary are different from resultjson. redo the test and write
+
+GitHub Copilot: I'll help you review the discrepancies and rerun the tests. Let me first check the current state of the review summary and results.json files. 
+
+Read [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/REVIEW_SUMMARY.md#1-1), lines 1 to 100
+
+Read [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/results.json#1-1), lines 1 to 100
+
+I can see the discrepancy. The REVIEW_SUMMARY.md shows different baseline metrics than results.json. Let me rerun the tests to get fresh, accurate results. 
+
+Ran terminal command: cd "c:\Bug_Bash\25_12_25\v-coralhuang_25_12_25_case1" | python run_tests.py
+
+Great! The tests have been rerun successfully. Now I need to update the REVIEW_SUMMARY.md to match the new results.json data: 
+
+Read [](file:///c%3A/Bug_Bash/25_12_25/v-coralhuang_25_12_25_case1/results.json#1-1), lines 1 to 50
+
+Now I'll update the REVIEW_SUMMARY.md with the correct data from the fresh test run: 
+
+Using "Replace String in File"
+
+
+```
+
+```
+
+
+Using "Replace String in File"
+
+
+```
+
+```
+
+
+Using "Replace String in File"
+
+
+```
+
+```
+
+
+Using "Replace String in File"
+
+
+```
+
+```
+
+
+Using "Replace String in File"
+
+
+```
+
+```
+Perfect! I've rerun the tests and updated the REVIEW_SUMMARY.md to match the fresh results.json data. Here's what changed:
+
+**Key Updates:**
+- **Baseline metrics**: p50 now 733.48ms, p95 1592.64ms, p99 1683.71ms (all FAIL)
+- **Optimized metrics**: p50 175.79ms, p95 249.62ms, p99 278.11ms (mostly PASS with p50 slightly over)
+- **Query reductions**: /api/users 58.97→1.03 (98.3%), /api/users/1/followers 104.57→0.98 (99.1%)
+- **Error rates**: Both baseline and optimized now show 0% (no connection pool issues)
+
+All documentation is now synchronized with the actual test results.
+
+Made changes.
