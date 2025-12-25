@@ -1,0 +1,19 @@
+{
+  "mode": "before_optimization",
+  "results": {
+    "count": 1800,
+    "status_counts": {},
+    "success_count": 1800,
+    "error_count": 0,
+    "error_rate": 0.0,
+    "p50_ms": 100.99100000024919,
+    "p95_ms": 117.25350000051549,
+    "p99_ms": 126.5876000006756,
+    "avg_queries": 97.73722222222223,
+    "queries_per_request_distribution": {
+      "min": 42,
+      "max": 141,
+      "median": 99.0
+    }
+  }
+}

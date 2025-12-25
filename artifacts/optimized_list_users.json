@@ -1,0 +1,20 @@
+{
+  "module": "handlers",
+  "handler": "get_users",
+  "results": {
+    "count": 1800,
+    "status_counts": {},
+    "success_count": 1800,
+    "error_count": 0,
+    "error_rate": 0.0,
+    "p50_ms": 104.84979999955613,
+    "p95_ms": 136.18809999934456,
+    "p99_ms": 185.5027000001428,
+    "avg_queries": 97.84222222222222,
+    "queries_per_request_distribution": {
+      "min": 20,
+      "max": 131,
+      "median": 99.0
+    }
+  }
+}

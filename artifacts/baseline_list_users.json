@@ -1,0 +1,20 @@
+{
+  "module": "handlers_baseline",
+  "handler": "get_users",
+  "results": {
+    "count": 300,
+    "status_counts": {},
+    "success_count": 300,
+    "error_count": 0,
+    "error_rate": 0.0,
+    "p50_ms": 1367.9620500001874,
+    "p95_ms": 1445.69010000032,
+    "p99_ms": 1469.6216000002096,
+    "avg_queries": 4963.16,
+    "queries_per_request_distribution": {
+      "min": 3886,
+      "max": 5374,
+      "median": 5051.0
+    }
+  }
+}
