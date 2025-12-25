@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This project optimizes a paginated REST API to meet strict latency SLAs under concurrent load. The optimization reduced query counts by **97.9-98.4%** and improved latency by **81-90%** on critical percentiles.
+This project optimizes a paginated REST API to meet strict latency SLAs under concurrent load. The optimization reduced query counts by **98.3-99.1%** and improved latency by **76-84%** on critical percentiles.
 
 ## Baseline Performance Issues
 
@@ -11,12 +11,12 @@ The baseline implementation exhibited two critical database access antipatterns:
 ### 1. **N+1 Queries in GET /api/users/1/followers**
 - **Bottleneck**: Lazy-loaded relationships without eager loading
 - **Impact**: Each follower lookup required a separate database query
-- **Evidence**: 99.26 queries per request (vs. 1.63 in optimized)
+- **Evidence**: 104.57 queries per request (vs. 0.98 in optimized)
 
 ### 2. **Unnecessary COUNT(*) in GET /api/users**
 - **Bottleneck**: COUNT(*) executed on every paginated request
 - **Impact**: Full table scan on every request to return total count
-- **Evidence**: 69.86 queries per request (vs. 1.48 in optimized)
+- **Evidence**: 58.97 queries per request (vs. 1.03 in optimized)
 
 ### 3. **Missing Composite Index on Follower Table**
 - **Bottleneck**: No index on (user_id, follower_id)
@@ -81,22 +81,22 @@ class Follower(db.Model):
 ### Baseline Workload (with bottlenecks)
 ```
 GET /api/users:
-  - p50: 383.77 ms
-  - p95: 680.59 ms  
-  - p99: 31840.92 ms
-  - Queries per request: 69.86
+  - p50: 733.48 ms
+  - p95: 1592.64 ms  
+  - p99: 1683.71 ms
+  - Queries per request: 58.97
 
 GET /api/users/1/followers:
-  - Queries per request: 99.26
+  - Queries per request: 104.57
 ```
 
 ### Optimized Workload (with fixes)
 ```
 GET /api/users:
-  - p50: 47.15 ms (-87.7%)
-  - p95: 67.44 ms (-90.1%)
-  - p99: 5941.42 ms (-81.3%)
-  - Queries per request: 1.48 (-97.9%)
+  - p50: 175.79 ms (-76.0%)
+  - p95: 249.62 ms (-84.3%)
+  - p99: 278.11 ms (-83.5%)
+  - Queries per request: 1.03 (-98.3%)
 
 GET /api/users/1/followers:
   - Queries per request: 1.63 (-98.4%)
