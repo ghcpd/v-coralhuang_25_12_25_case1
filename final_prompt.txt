@@ -66,3 +66,12 @@ Required deliverables:
 
 Any optimization that cannot be clearly verified by a third-party reviewer
 will be considered invalid, even if latency numbers appear improved.
+
+CRITICAL CONSISTENCY REQUIREMENT:
+After completing the implementation, you must verify that all documentation files (REVIEW_SUMMARY.md, README.md, CHANGES.md, SUBMISSION_SUMMARY.txt, DELIVERY_CHECKLIST.md, and any other documentation) contain metrics that exactly match the results.json file. If any discrepancies are found between documentation and results.json:
+1. Rerun the complete test suite (run_tests.py or equivalent)
+2. Update ALL documentation files with the fresh test results from the new results.json
+3. Ensure numerical consistency across all files (latencies, query counts, percentiles, error rates)
+4. Double-check that baseline and optimized metrics are accurately reflected everywhere
+
+All documentation must be internally consistent and must match the actual test output. No discrepancies are acceptable.
